@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math"
 	"math/big"
-
 )
 
 func GenerateOTP(maxDigits uint32) string {
