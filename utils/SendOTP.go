@@ -1,53 +1,41 @@
 package utils
 
 import (
-	"context"
 	"fmt"
-	"time"
+	"log"
 
-	"github.com/mailersend/mailersend-go"
+	gomail "gopkg.in/mail.v2"
 )
 
 func SendOTP(clientName string, clientEmail string, otp string) {
-	ms := mailersend.NewMailersend(Config("MAILERSEND_API_KEY"))
 
-	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
+	FROM_EMAIL := Config("FROM_EMAIL")
+	API_HOST := Config("API_HOST")
+	API_Username := Config("API_Username")
+	API_Password := Config("API_Password")
 
-	subject := "Subject"
-	text := "your OTP is" + otp
-	html := "Greetings from the team, you got this message through MailerSend."
+	fmt.Print(FROM_EMAIL+" "+" "+API_HOST+" "+API_Username+" "+API_Password, "\n")
 
-	from := mailersend.From{
-		Name:  Config("MAILERSEND_FROM_NAME"),
-		Email: Config("MAILERSEND_FROM_EMAIL"),
+	// Create a new message
+	message := gomail.NewMessage()
+
+	// Set email headers
+	message.SetHeader("From", FROM_EMAIL)
+	message.SetHeader("To", clientEmail)
+	message.SetHeader("Subject", "Your OTP Code")
+
+	// Set email body
+	message.SetBody("text/plain", fmt.Sprintf("Hello %s, your OTP code is: %s", clientName, otp))
+
+	// Set up the SMTP dialer
+	dialer := gomail.NewDialer("sandbox.smtp.mailtrap.io", 587, API_Username, API_Password)
+
+	// Send the email
+	if err := dialer.DialAndSend(message); err != nil {
+		log.Printf("Failed to send email to %s: %v", clientEmail, err)
+		panic(err)
+	} else {
+		fmt.Println("Email sent successfully!")
 	}
 
-	recipients := []mailersend.Recipient{
-		{
-			Name:  clientName,
-			Email: clientEmail,
-		},
-	}
-
-	tags := []string{"foo", "bar"}
-
-	message := ms.Email.NewMessage()
-
-	message.SetFrom(from)
-	message.SetRecipients(recipients)
-	message.SetSubject(subject)
-	message.SetHTML(html)
-	message.SetText(text)
-	message.SetTags(tags)
-
-	message.SetInReplyTo("client-id")
-
-	res, err := ms.Email.Send(ctx, message)
-	if err != nil {
-		fmt.Printf("Error sending email: %v\n", err)
-		return
-	}
-	fmt.Printf("Email sent! Message ID: %s\n", res.Header.Get("X-Message-Id"))
 }
