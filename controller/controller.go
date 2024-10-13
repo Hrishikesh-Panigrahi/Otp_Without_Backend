@@ -13,6 +13,7 @@ import (
 var email string
 
 // UserInput is a controller function to handle the user input
+// and send the OTP to the user
 func UserInput(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "POST" {
@@ -54,7 +55,7 @@ func UserInput(w http.ResponseWriter, r *http.Request) {
 		})
 
 		// Redirect to the OTP page
-		http.Redirect(w, r, "/otp", http.StatusSeeOther)
+		http.Redirect(w, r, "/otp", http.StatusFound)
 	}
 
 }
@@ -70,7 +71,7 @@ func VerifyOTP(w http.ResponseWriter, r *http.Request) {
 
 		otp := r.FormValue("otp")
 		fmt.Print(otp)
-		cookie, err := r.Cookie("otp_hash")
+		cookie, err := r.Cookie("OTP_HASH")
 
 		if err != nil {
 			fmt.Fprintf(w, "Cookie not found")
@@ -87,7 +88,7 @@ func VerifyOTP(w http.ResponseWriter, r *http.Request) {
 		expiryStr := parts[1]
 
 		// Parse the expiry timestamp
-		expiry, err := time.Parse(time.RFC3339, expiryStr)
+		expiry, err := time.Parse("2006-01-02 15:04:05", expiryStr)
 		if err != nil || time.Now().After(expiry) {
 			http.Error(w, "OTP expired", http.StatusUnauthorized)
 			return
@@ -102,6 +103,5 @@ func VerifyOTP(w http.ResponseWriter, r *http.Request) {
 		} else {
 			fmt.Fprintf(w, "OTP is invalid")
 		}
-
 	}
 }

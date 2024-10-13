@@ -8,10 +8,11 @@ import (
 )
 
 func main() {
-
+	// Handle the routes for the Frontend
 	http.HandleFunc("/", controller.Emailhandler)
-	http.HandleFunc("/otp", controller.Emailhandler)
+	http.HandleFunc("/otp", controller.OTPhandler)
 
+	// Handle the routes for the Backend
 	http.HandleFunc("/userinput", controller.UserInput)
 	http.HandleFunc("/verifyotp", controller.VerifyOTP)
 
