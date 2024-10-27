@@ -17,7 +17,6 @@ func Emailhandler(c *gin.Context) {
 	}
 
 	utils.RenderHtml(c, http.StatusOK, "base.html", data)
-
 }
 
 func OTPhandler(c *gin.Context) {
@@ -30,5 +29,16 @@ func OTPhandler(c *gin.Context) {
 	}
 
 	utils.RenderHtml(c, http.StatusOK, "base.html", data)
+}
 
+func Result(c *gin.Context) {
+	type Data struct {
+		Title string
+	}
+
+	data := Data{
+		Title: "Result",
+	}
+
+	utils.RenderHtml(c, http.StatusOK, "base.html", data)
 }

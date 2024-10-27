@@ -7,13 +7,12 @@ import (
 
 func main() {
 	router := gin.Default()
-
 	router.LoadHTMLGlob("./templates/*.html")
 
 	router.GET("/", controller.Emailhandler)
 	router.GET("/otp", controller.OTPhandler)
+	router.GET("/result", controller.Result)
 
-	// Handle the routes for the Backend
 	router.GET("/userinput", controller.UserInput)
 	router.GET("/verifyotp", controller.VerifyOTP)
 
