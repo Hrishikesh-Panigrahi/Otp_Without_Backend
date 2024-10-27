@@ -16,7 +16,6 @@ var email string
 // UserInput is a controller function to handle the user input
 // and send the OTP to the user
 func UserInput(c *gin.Context) {
-
 	if c.Request.Method == "POST" {
 		if err := c.Request.ParseForm(); err != nil {
 			fmt.Fprintf(c.Writer, "ParseForm() err: %v", err)
@@ -52,7 +51,6 @@ func UserInput(c *gin.Context) {
 		fmt.Printf("\n" + hash)
 		fmt.Printf("\n" + fullHash)
 
-		//set cookies
 		http.SetCookie(c.Writer, &http.Cookie{
 			Name:    "OTP_HASH",
 			Value:   fmt.Sprintf("%s.%s", hash, expires.Format("2006-01-02 15:04:05")),
@@ -60,7 +58,6 @@ func UserInput(c *gin.Context) {
 			Path:    "/",
 		})
 
-		// Redirect to the OTP page
 		utils.Redirect(c, "/otp", http.StatusFound)
 	}
 
@@ -71,18 +68,25 @@ func UserInput(c *gin.Context) {
 // with the stored hash in the cookie and stores the result
 // in another cookie
 func VerifyOTP(c *gin.Context) {
+	clientIP := c.ClientIP()
+
+	if !utils.CheckRateLimit(clientIP) {
+		http.Error(c.Writer, "Too many attempts, please try again later", http.StatusTooManyRequests)
+		return
+	}
+
 	if c.Request.Method == "POST" {
 		if err := c.Request.ParseForm(); err != nil {
-			fmt.Fprintf(c.Writer, "ParseForm() err: %v", err)
+			http.Error(c.Writer, fmt.Sprintf("ParseForm() err: %v", err), http.StatusBadRequest)
 			return
 		}
 
 		otp := c.PostForm("otp")
-		fmt.Print(otp)
-		cookie, err := c.Cookie("OTP_HASH")
+		fmt.Println("Received OTP:", otp)
 
+		cookie, err := c.Cookie("OTP_HASH")
 		if err != nil {
-			fmt.Fprintf(c.Writer, "Cookie not found")
+			http.Error(c.Writer, "Cookie not found", http.StatusUnauthorized)
 			return
 		}
 
@@ -110,17 +114,18 @@ func VerifyOTP(c *gin.Context) {
 			return
 		}
 
+		resultMessage := "OTP is invalid"
 		if hash == storedHash {
-			http.SetCookie(c.Writer, &http.Cookie{
-				Name:  "result",
-				Value: "OTP is valid",
-			})
-		} else {
-			http.SetCookie(c.Writer, &http.Cookie{
-				Name:  "result",
-				Value: "OTP is invalid",
-			})
+			resultMessage = "OTP is valid"
 		}
+
+		http.SetCookie(c.Writer, &http.Cookie{
+			Name:     "result",
+			Value:    resultMessage,
+			HttpOnly: true,
+			Secure:   true,
+			Path:     "/result",
+		})
 
 		utils.Redirect(c, "/result", http.StatusFound)
 	}

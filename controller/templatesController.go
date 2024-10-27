@@ -9,6 +9,8 @@ import (
 )
 
 func Emailhandler(c *gin.Context) {
+	utils.ClearCookies(c)
+
 	type Data struct {
 		Title string
 	}

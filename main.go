@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/Hrishikesh-Panigrahi/Otp_Without_Backend/controller"
 	"github.com/Hrishikesh-Panigrahi/Otp_Without_Backend/utils"
@@ -9,6 +10,16 @@ import (
 )
 
 func main() {
+	// Clean up rate limits periodically to free up memory
+	go func() {
+		cleanupInterval := 5 * time.Minute
+
+		for {
+			time.Sleep(cleanupInterval)
+			utils.CleanRateLimits()
+		}
+	}()
+
 	router := gin.Default()
 	router.LoadHTMLGlob("./templates/*.html")
 
