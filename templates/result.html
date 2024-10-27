@@ -1,10 +1,25 @@
 {{ define "Result" }}
-    {{ if eq .data.Result "safe" }}
-        <h1>OTP is valid</h1>
-    {{ else if eq .data.Result "Unsafe" }}
-        <h1>Unsafe</h1>
-    {{ else }}
-        <h1>Page not found</h1>
-        <p>The page you are looking for does not exist.</p>
-    {{ end }}
+<div class="flex items-center justify-center min-h-screen bg-gray-100">
+    <div class="bg-white shadow-md rounded-lg p-8 max-w-sm w-full">
+        {{ if eq .data.Result "safe" }}
+            <h1 class="text-2xl font-bold text-green-600 mb-4">OTP is valid</h1>
+            <p class="text-gray-700">Your OTP has been successfully verified. You can proceed.</p>
+            <div class="mt-6">
+                <a href="/next-step" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition duration-200">Continue</a>
+            </div>
+        {{ else if eq .data.Result "Unsafe" }}
+            <h1 class="text-2xl font-bold text-red-600 mb-4">Unsafe</h1>
+            <p class="text-gray-700">Your OTP is invalid or unsafe. Please try again.</p>
+            <div class="mt-6">
+                <a href="/retry" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition duration-200">Retry</a>
+            </div>
+        {{ else }}
+            <h1 class="text-2xl font-bold text-yellow-600 mb-4">Page not found</h1>
+            <p class="text-gray-700">The page you are looking for does not exist.</p>
+            <div class="mt-6">
+                <a href="/" class="bg-yellow-600 text-white py-2 px-4 rounded hover:bg-yellow-700 transition duration-200">Go Home</a>
+            </div>
+        {{ end }}
+    </div>
+</div>
 {{ end }}

@@ -12,7 +12,6 @@ func Emailhandler(c *gin.Context) {
 	type Data struct {
 		Title string
 	}
-
 	data := Data{
 		Title: "SignUp",
 	}
@@ -24,7 +23,6 @@ func OTPhandler(c *gin.Context) {
 	type Data struct {
 		Title string
 	}
-
 	data := Data{
 		Title: "OTP",
 	}
@@ -51,7 +49,7 @@ func Result(c *gin.Context) {
 	}
 
 	fmt.Println(message)
-	
+
 	type Data struct {
 		Title  string
 		Result string
