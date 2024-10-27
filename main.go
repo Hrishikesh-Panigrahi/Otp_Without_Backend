@@ -13,8 +13,7 @@ func main() {
 	router.GET("/otp", controller.OTPhandler)
 	router.GET("/result", controller.Result)
 
-	router.GET("/userinput", controller.UserInput)
-	router.GET("/verifyotp", controller.VerifyOTP)
-
+	router.POST("/userinput", controller.UserInput)
+	router.POST("/verifyotp", controller.VerifyOTP)
 	router.Run(":8080")
 }

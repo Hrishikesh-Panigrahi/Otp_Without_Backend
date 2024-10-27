@@ -1,18 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Result</title>
-</head>
-<body>
-    {{ if eq .data.message "safe" }}
-        <h1>Safe</h1>
-    {{ else if eq .data.message "unsafe" }}
+{{ define "Result" }}
+    {{ if eq .data.Result "safe" }}
+        <h1>OTP is valid</h1>
+    {{ else if eq .data.Result "Unsafe" }}
         <h1>Unsafe</h1>
     {{ else }}
         <h1>Page not found</h1>
         <p>The page you are looking for does not exist.</p>
     {{ end }}
-</body>
-</html>
+{{ end }}

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/Hrishikesh-Panigrahi/Otp_Without_Backend/utils"
@@ -32,13 +33,31 @@ func OTPhandler(c *gin.Context) {
 }
 
 func Result(c *gin.Context) {
-	type Data struct {
-		Title string
+	cookie, err := c.Cookie("result")
+
+	if err != nil {
+		fmt.Fprintf(c.Writer, "Cookie not found")
+		return
 	}
 
-	data := Data{
-		Title: "Result",
+	fmt.Println(cookie)
+
+	var message string
+
+	if cookie == "OTP is valid" {
+		message = "safe"
+	} else {
+		message = "Unsafe"
 	}
+
+	fmt.Println(message)
+	
+	type Data struct {
+		Title  string
+		Result string
+	}
+
+	data := Data{Title: "Result", Result: message}
 
 	utils.RenderHtml(c, http.StatusOK, "base.html", data)
 }

@@ -18,7 +18,6 @@ var email string
 func UserInput(c *gin.Context) {
 
 	if c.Request.Method == "POST" {
-		// Parse the form data
 		if err := c.Request.ParseForm(); err != nil {
 			fmt.Fprintf(c.Writer, "ParseForm() err: %v", err)
 			return
@@ -27,13 +26,10 @@ func UserInput(c *gin.Context) {
 		email = c.PostForm("email")
 		fmt.Println("Email received:", email)
 
-		// Generate a 6 digit OTP
 		otp := utils.GenerateOTP(6)
 
-		// Send the OTP to the user
 		utils.SendOTP("User", email, otp)
 
-		// Set the expiry time of the OTP
 		ttl := 5 * 60
 		expires := time.Now().Add(time.Duration(ttl) * time.Second)
 
@@ -62,9 +58,11 @@ func UserInput(c *gin.Context) {
 }
 
 // VerifyOTP is a controller function to verify the OTP
+// entered by the user. It compares the hash of the OTP
+// with the stored hash in the cookie and stores the result
+// in another cookie
 func VerifyOTP(c *gin.Context) {
 	if c.Request.Method == "POST" {
-		// Parse the form data
 		if err := c.Request.ParseForm(); err != nil {
 			fmt.Fprintf(c.Writer, "ParseForm() err: %v", err)
 			return
@@ -98,11 +96,18 @@ func VerifyOTP(c *gin.Context) {
 		data := fmt.Sprintf(email + "." + otp + "." + expiryStr)
 		hash := utils.CreateHash(data)
 
-		// Check if the hash is correct
 		if hash == storedHash {
-			fmt.Fprintf(c.Writer, "OTP is valid")
+			http.SetCookie(c.Writer, &http.Cookie{
+				Name:  "result",
+				Value: "OTP is valid",
+			})
 		} else {
-			fmt.Fprintf(c.Writer, "OTP is invalid")
+			http.SetCookie(c.Writer, &http.Cookie{
+				Name:  "result",
+				Value: "OTP is invalid",
+			})
 		}
+		
+		utils.Redirect(c, "/result", http.StatusFound)
 	}
 }
