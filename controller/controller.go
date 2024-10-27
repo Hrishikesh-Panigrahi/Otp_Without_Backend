@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Hrishikesh-Panigrahi/Otp_Without_Backend/utils"
+	"github.com/gin-gonic/gin"
 )
 
 // global variable for email
@@ -14,16 +15,16 @@ var email string
 
 // UserInput is a controller function to handle the user input
 // and send the OTP to the user
-func UserInput(w http.ResponseWriter, r *http.Request) {
+func UserInput(c *gin.Context) {
 
-	if r.Method == "POST" {
+	if c.Request.Method == "POST" {
 		// Parse the form data
-		if err := r.ParseForm(); err != nil {
-			fmt.Fprintf(w, "ParseForm() err: %v", err)
+		if err := c.Request.ParseForm(); err != nil {
+			fmt.Fprintf(c.Writer, "ParseForm() err: %v", err)
 			return
 		}
 
-		email = r.FormValue("email")
+		email = c.PostForm("email")
 		fmt.Println("Email received:", email)
 
 		// Generate a 6 digit OTP
@@ -47,7 +48,7 @@ func UserInput(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("\n" + fullHash)
 
 		//set cookies
-		http.SetCookie(w, &http.Cookie{
+		http.SetCookie(c.Writer, &http.Cookie{
 			Name:    "OTP_HASH",
 			Value:   fmt.Sprintf("%s.%s", hash, expires.Format("2006-01-02 15:04:05")),
 			Expires: expires,
@@ -55,32 +56,32 @@ func UserInput(w http.ResponseWriter, r *http.Request) {
 		})
 
 		// Redirect to the OTP page
-		http.Redirect(w, r, "/otp", http.StatusFound)
+		utils.Redirect(c, "/otp", http.StatusFound)
 	}
 
 }
 
 // VerifyOTP is a controller function to verify the OTP
-func VerifyOTP(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
+func VerifyOTP(c *gin.Context) {
+	if c.Request.Method == "POST" {
 		// Parse the form data
-		if err := r.ParseForm(); err != nil {
-			fmt.Fprintf(w, "ParseForm() err: %v", err)
+		if err := c.Request.ParseForm(); err != nil {
+			fmt.Fprintf(c.Writer, "ParseForm() err: %v", err)
 			return
 		}
 
-		otp := r.FormValue("otp")
+		otp := c.PostForm("otp")
 		fmt.Print(otp)
-		cookie, err := r.Cookie("OTP_HASH")
+		cookie, err := c.Cookie("OTP_HASH")
 
 		if err != nil {
-			fmt.Fprintf(w, "Cookie not found")
+			fmt.Fprintf(c.Writer, "Cookie not found")
 			return
 		}
 
-		parts := strings.Split(cookie.Value, ".")
+		parts := strings.Split(cookie, ".")
 		if len(parts) < 2 {
-			http.Error(w, "Invalid OTP data", http.StatusUnauthorized)
+			http.Error(c.Writer, "Invalid OTP data", http.StatusUnauthorized)
 			return
 		}
 
@@ -90,7 +91,7 @@ func VerifyOTP(w http.ResponseWriter, r *http.Request) {
 		// Parse the expiry timestamp
 		expiry, err := time.Parse("2006-01-02 15:04:05", expiryStr)
 		if err != nil || time.Now().After(expiry) {
-			http.Error(w, "OTP expired", http.StatusUnauthorized)
+			http.Error(c.Writer, "OTP expired", http.StatusUnauthorized)
 			return
 		}
 
@@ -99,9 +100,9 @@ func VerifyOTP(w http.ResponseWriter, r *http.Request) {
 
 		// Check if the hash is correct
 		if hash == storedHash {
-			fmt.Fprintf(w, "OTP is valid")
+			fmt.Fprintf(c.Writer, "OTP is valid")
 		} else {
-			fmt.Fprintf(w, "OTP is invalid")
+			fmt.Fprintf(c.Writer, "OTP is invalid")
 		}
 	}
 }

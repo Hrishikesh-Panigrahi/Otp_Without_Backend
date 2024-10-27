@@ -1,33 +1,34 @@
 package controller
 
 import (
-	"html/template"
-	"log"
 	"net/http"
+
+	"github.com/Hrishikesh-Panigrahi/Otp_Without_Backend/utils"
+	"github.com/gin-gonic/gin"
 )
 
-func Emailhandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("./templates/index.html")
-	if err != nil {
-		http.Error(w, "Unable to load template", http.StatusInternalServerError)
-		log.Printf("Error parsing template: %v", err)
-		return
+func Emailhandler(c *gin.Context) {
+	type Data struct {
+		Title string
 	}
-	if err := t.Execute(w, nil); err != nil {
-		http.Error(w, "Template execution error", http.StatusInternalServerError)
-		log.Printf("Error executing template: %v", err)
+
+	data := Data{
+		Title: "SignUp",
 	}
+
+	utils.RenderHtml(c, http.StatusOK, "base.html", data)
+
 }
 
-func OTPhandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("./templates/otp.html")
-	if err != nil {
-		http.Error(w, "Unable to load template", http.StatusInternalServerError)
-		log.Printf("Error parsing template: %v", err)
-		return
+func OTPhandler(c *gin.Context) {
+	type Data struct {
+		Title string
 	}
-	if err := t.Execute(w, nil); err != nil {
-		http.Error(w, "Template execution error", http.StatusInternalServerError)
-		log.Printf("Error executing template: %v", err)
+
+	data := Data{
+		Title: "OTP",
 	}
+
+	utils.RenderHtml(c, http.StatusOK, "base.html", data)
+
 }
