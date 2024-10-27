@@ -26,7 +26,11 @@ func UserInput(c *gin.Context) {
 		email = c.PostForm("email")
 		fmt.Println("Email received:", email)
 
-		otp := utils.GenerateOTP(6)
+		otp, err := utils.GenerateOTP(6)
+		if err != nil {
+			http.Error(c.Writer, "Failed to generate OTP", http.StatusInternalServerError)
+			return
+		}
 
 		utils.SendOTP("User", email, otp)
 
@@ -35,7 +39,12 @@ func UserInput(c *gin.Context) {
 
 		// Create a hash of the OTP, expiry time and a secure key
 		data := fmt.Sprintf(email + "." + otp + "." + expires.Format("2006-01-02 15:04:05"))
-		hash := utils.CreateHash(data)
+		hash, err := utils.CreateHash(data)
+
+		if err != nil {
+			http.Error(c.Writer, "Failed to create hash", http.StatusInternalServerError)
+			return
+		}
 
 		// Create a full hash by concatenating the hash and the expiry time
 		fullHash := hash + "." + expires.Format("2006-01-02 15:04:05")
@@ -94,7 +103,12 @@ func VerifyOTP(c *gin.Context) {
 		}
 
 		data := fmt.Sprintf(email + "." + otp + "." + expiryStr)
-		hash := utils.CreateHash(data)
+		hash, err := utils.CreateHash(data)
+
+		if err != nil {
+			http.Error(c.Writer, "Failed to create hash", http.StatusInternalServerError)
+			return
+		}
 
 		if hash == storedHash {
 			http.SetCookie(c.Writer, &http.Cookie{
@@ -107,7 +121,7 @@ func VerifyOTP(c *gin.Context) {
 				Value: "OTP is invalid",
 			})
 		}
-		
+
 		utils.Redirect(c, "/result", http.StatusFound)
 	}
 }

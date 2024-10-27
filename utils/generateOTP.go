@@ -7,13 +7,18 @@ import (
 	"math/big"
 )
 
-func GenerateOTP(maxDigits uint32) string {
-	bi, err := rand.Int(
-		rand.Reader,
-		big.NewInt(int64(math.Pow(10, float64(maxDigits)))),
-	)
-	if err != nil {
-		panic(err)
+func GenerateOTP(maxDigits uint32) (string, error) {
+	if maxDigits == 0 {
+		return "", fmt.Errorf("maxDigits must be greater than 0")
 	}
-	return fmt.Sprintf("%0*d", maxDigits, bi)
+
+	upperLimit := big.NewInt(int64(math.Pow(10, float64(maxDigits))))
+
+	bi, err := rand.Int(rand.Reader, upperLimit)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate OTP: %w", err)
+	}
+
+	otp := fmt.Sprintf("%0*d", maxDigits, bi)
+	return otp, nil
 }

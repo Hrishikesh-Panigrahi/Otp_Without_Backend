@@ -38,17 +38,13 @@ func Result(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(cookie)
-
 	var message string
 
 	if cookie == "OTP is valid" {
 		message = "safe"
-	} else {
+	} else if cookie == "OTP is not valid" {
 		message = "Unsafe"
 	}
-
-	fmt.Println(message)
 
 	type Data struct {
 		Title  string
@@ -58,4 +54,20 @@ func Result(c *gin.Context) {
 	data := Data{Title: "Result", Result: message}
 
 	utils.RenderHtml(c, http.StatusOK, "base.html", data)
+}
+
+func Nextstep(c *gin.Context) {
+	cookie, err := c.Cookie("result")
+
+	if err != nil {
+		fmt.Fprintf(c.Writer, "Cookie not found")
+		return
+	}
+
+	if cookie == "OTP is valid" {
+		fmt.Fprint(c.Writer, "This would ideally be Next step")
+	} else {
+		fmt.Fprint(c.Writer, "OTP is not valid")
+	}
+
 }
